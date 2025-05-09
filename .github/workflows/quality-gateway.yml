@@ -12,7 +12,61 @@ jobs:
           fetch-depth: 0
 
       - name: install dependencies
-        run: sudo apt update && sudo apt install -y neovim
+        run: |
+          sudo apt update && sudo apt install -y curl zip make git
+          curl -LO https://github.com/MordechaiHadad/bob/releases/download/v4.0.3/bob-linux-aarch64.zip
+          unzip bob-linux-aarch64.zip
+          chmod +x ./bob-linux-aarch64/bob
+          ./bob-linux-aarch64/bob
+          bob-linux-aarch64/bob use latest
+          export PATH=$PATH:$HOME/.local/share/bob/nvim-bin
+
+          mkdir -p ~/.config/nvim/lua/config
+          mkdir -p ~/.config/nvim/lua/plugins
+
+          echo 'require("config.lazy")' >> ~/.config/nvim/init.lua
+
+          echo '
+            -- Bootstrap lazy.nvim
+            local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+            if not (vim.uv or vim.loop).fs_stat(lazypath) then
+              local lazyrepo = "https://github.com/folke/lazy.nvim.git"
+              local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
+              if vim.v.shell_error ~= 0 then
+                vim.api.nvim_echo({
+                  { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
+                  { out, "WarningMsg" },
+                  { "\nPress any key to exit..." },
+                }, true, {})
+                vim.fn.getchar()
+                os.exit(1)
+              end
+            end
+            vim.opt.rtp:prepend(lazypath)
+
+            -- Make sure to setup `mapleader` and `maplocalleader` before
+            -- loading lazy.nvim so that mappings are correct.
+            -- This is also a good place to setup other settings (vim.opt)
+            vim.g.mapleader = " "
+            vim.g.maplocalleader = "\\"
+
+            -- Setup lazy.nvim
+            require("lazy").setup({
+              spec = {
+                -- import your plugins
+                { import = "plugins" },
+              },
+              -- Configure any other settings here. See the documentation for more details.
+              -- colorscheme that will be used when installing plugins.
+              install = { colorscheme = { "habamax" } },
+              -- automatically check for plugin updates
+              checker = { enabled = true },
+            })
+          ' > ~/.config/nvim/lua/config/lazy.lua
+
+          echo 'return { "nvim-lua/plenary.nvim", lazy = false }' > ~/.config/nvim/lua/plugins/init.lua
+
+          nvim --headless -c 'Lazy' +qa
 
       - name: Run tests
         run: make tests

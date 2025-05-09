@@ -8,7 +8,7 @@ encrypt:
 
 tests:
 	echo "===> Run integrations tests (nvim)"
-	nvim --headless -c 'lua require("tests")' -c 'qa!'
+	nvim --headless -c 'PlenaryBustedDirectory lua/tests/'
 
 fmt:
 	echo "===> Formatting"
