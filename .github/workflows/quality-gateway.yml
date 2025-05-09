@@ -67,6 +67,5 @@ jobs:
 
           nvim --headless -c 'Lazy' +qa
 
-      - name: Run tests
-        run: make tests
+          make tests
 
