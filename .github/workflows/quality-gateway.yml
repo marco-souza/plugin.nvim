@@ -14,11 +14,11 @@ jobs:
       - name: install dependencies
         run: |
           sudo apt update && sudo apt install -y curl zip make git
-          curl -LO https://github.com/MordechaiHadad/bob/releases/download/v4.0.3/bob-linux-aarch64.zip
-          unzip bob-linux-aarch64.zip
-          chmod +x ./bob-linux-aarch64/bob
-          ./bob-linux-aarch64/bob
-          bob-linux-aarch64/bob use latest
+          curl -LO https://github.com/MordechaiHadad/bob/releases/download/v4.0.3/bob-linux-x86_64.zip
+          unzip bob-linux-x86_64.zip
+          chmod +x ./bob-linux-x86_64/bob
+          ./bob-linux-x86_64/bob
+          bob-linux-x86_64/bob use latest
           export PATH=$PATH:$HOME/.local/share/bob/nvim-bin
 
           mkdir -p ~/.config/nvim/lua/config
