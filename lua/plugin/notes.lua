@@ -33,8 +33,13 @@ function M.open(cwd)
   cwd = cwd or vim.uv.cwd()
   local files = M.list_md_files(cwd)
 
+  -- mount both splits relative to the current window so the layout lives
+  -- inside the current buffer's window instead of the whole editor
+  local winid = vim.api.nvim_get_current_win()
+  local relative = { type = "win", winid = winid }
+
   local sidebar = Split({
-    relative = "editor",
+    relative = relative,
     position = "left",
     size = "20%",
     enter = true,
@@ -42,7 +47,7 @@ function M.open(cwd)
     win_options = { winhighlight = "Normal:Normal" },
   })
   local main = Split({
-    relative = "editor",
+    relative = relative,
     position = "right",
     size = "80%",
     buf_options = { buftype = "", filetype = "markdown" },
