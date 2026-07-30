@@ -2,70 +2,33 @@ name: Quality Gateway
 
 on:
   push:
+  pull_request:
 
 jobs:
   quality-gateway:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: install dependencies
+      - name: install toolchain
         run: |
-          sudo apt update && sudo apt install -y curl zip make git
+          sudo apt update && sudo apt install -y curl unzip make git luarocks
+          luarocks install luacheck
+          curl -LO https://github.com/JohnnyMorganz/StyLua/releases/latest/download/stylua-linux-x86_64.zip
+          unzip stylua-linux-x86_64.zip && chmod +x stylua && sudo mv stylua /usr/local/bin/
+
           curl -LO https://github.com/MordechaiHadad/bob/releases/download/v4.0.3/bob-linux-x86_64.zip
-          unzip bob-linux-x86_64.zip
-          chmod +x ./bob-linux-x86_64/bob
+          unzip bob-linux-x86_64.zip && chmod +x ./bob-linux-x86_64/bob
           ./bob-linux-x86_64/bob use latest
-          export PATH=$PATH:$HOME/.local/share/bob/nvim-bin
+          echo "$HOME/.local/share/bob/nvim-bin" >> "$GITHUB_PATH"
 
-          mkdir -p ~/.config/nvim/lua/config
-          mkdir -p ~/.config/nvim/lua/plugins
+      - name: format check
+        run: make fmt-check
 
-          echo 'require("config.lazy")' >> ~/.config/nvim/init.lua
+      - name: lint
+        run: make lint
 
-          echo '
-            -- Bootstrap lazy.nvim
-            local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-            if not (vim.uv or vim.loop).fs_stat(lazypath) then
-              local lazyrepo = "https://github.com/folke/lazy.nvim.git"
-              local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
-              if vim.v.shell_error ~= 0 then
-                vim.api.nvim_echo({
-                  { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-                  { out, "WarningMsg" },
-                  { "\nPress any key to exit..." },
-                }, true, {})
-                vim.fn.getchar()
-                os.exit(1)
-              end
-            end
-            vim.opt.rtp:prepend(lazypath)
-
-            -- Make sure to setup `mapleader` and `maplocalleader` before
-            -- loading lazy.nvim so that mappings are correct.
-            -- This is also a good place to setup other settings (vim.opt)
-            vim.g.mapleader = " "
-            vim.g.maplocalleader = "\\"
-
-            -- Setup lazy.nvim
-            require("lazy").setup({
-              spec = {
-                -- import your plugins
-                { import = "plugins" },
-              },
-              -- Configure any other settings here. See the documentation for more details.
-              -- colorscheme that will be used when installing plugins.
-              install = { colorscheme = { "habamax" } },
-              -- automatically check for plugin updates
-              checker = { enabled = true },
-            })
-          ' > ~/.config/nvim/lua/config/lazy.lua
-
-          echo 'return { "nvim-lua/plenary.nvim", lazy = false }' > ~/.config/nvim/lua/plugins/init.lua
-
-          nvim --headless -c 'Lazy' +qa
-
-          make tests
-
+      - name: tests
+        run: make tests

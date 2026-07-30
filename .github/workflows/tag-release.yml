@@ -9,7 +9,7 @@ jobs:
   gh-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Create release with tag
         uses: marco-souza/tag-release@1.2.0

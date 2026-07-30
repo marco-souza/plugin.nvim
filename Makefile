@@ -1,23 +1,41 @@
-all: pr-ready
+# plugin.nvim — make targets
+#
+#   make help        — list targets
+#   make install     — install nvim + stylua + luacheck
+#   make tests       — run the specs (needs nvim)
+#   make fmt          — format lua/ with stylua
+#   make fmt-check    — check formatting without writing
+#   make lint         — luacheck
+#   make rename NAME=you/plugin.nvim — rename the template
+#   make pr-ready     — fmt-check, lint, tests
 
-decrypt:
-	echo "===> Decrypting" && gpg -d .env.gpg > .env
+NAME ?= marco-souza/plugin.nvim
 
-encrypt:
-	echo "===> Encrypting" && gpg -c .env
+.PHONY: help install tests fmt fmt-check lint rename pr-ready
 
-tests:
-	echo "===> Run integrations tests (nvim)"
-	nvim --headless -c 'PlenaryBustedDirectory lua/tests/'
+help: ## show this help
+	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
+	  awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-14s\033[0m %s\n",$1,$2}'
 
-fmt:
-	echo "===> Formatting"
+install: ## install toolchain
+	@echo "===> Installing stylua + luacheck (needs cargo) or luarocks"
+	cargo install stylua || luarocks install stylua
+	luarocks install luacheck
+
+tests: ## run specs with plenary (auto-bootstrapped)
+	@echo "===> Tests"
+	nvim --headless -c 'luafile tests/bootstrap.lua' -c 'PlenaryBustedDirectory tests/'
+
+fmt: ## format
 	stylua lua/ --config-path=.stylua.toml
 
-lint:
-	echo "===> Linting"
+fmt-check: ## check formatting
+	stylua --check lua/ --config-path=.stylua.toml
+
+lint: ## lint
 	luacheck lua/ --globals vim
 
-pr-ready: fmt lint
-	echo "===> Preparring PR"
-	git commit
+rename: ## rename the template; usage: make rename NAME=you/plugin.nvim
+	@./scripts/rename.sh $(NAME)
+
+pr-ready: fmt-check lint tests ## prep PR (fmt-check, lint, tests)
