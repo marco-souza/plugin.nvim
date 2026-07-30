@@ -24,7 +24,7 @@ install: ## install toolchain
 
 tests: ## run specs with plenary (auto-bootstrapped)
 	@echo "===> Tests"
-	nvim --headless -c 'luafile tests/bootstrap.lua' -c 'PlenaryBustedDirectory tests/'
+	nvim --headless -c 'luafile tests/bootstrap.lua' -c 'PlenaryBustedDirectory tests/' -c 'qa!'
 
 fmt: ## format
 	stylua lua/ --config-path=.stylua.toml

@@ -12,7 +12,9 @@ local M = {}
 function M.list_md_files(cwd)
   local files = {}
   for name in vim.fs.dir(cwd) do
-    if name:sub(-3) == ".md" then files[#files + 1] = name end
+    if name:sub(-3) == ".md" then
+      files[#files + 1] = name
+    end
   end
   table.sort(files)
   return files
@@ -63,13 +65,20 @@ function M.open(cwd)
   vim.keymap.set("n", "<CR>", function()
     local row = vim.api.nvim_win_get_cursor(sidebar.winid)[1]
     local name = files[row]
-    if not name then return end
+    if not name then
+      return
+    end
     set_lines(main, vim.fn.readfile(vim.fs.joinpath(cwd, name)))
   end, { buffer = sidebar.bufnr, nowait = true, silent = true })
 
   -- q closes the whole layout from either pane
   for _, split in ipairs({ sidebar, main }) do
-    vim.keymap.set("n", "q", M.close, { buffer = split.bufnr, nowait = true, silent = true })
+    vim.keymap.set(
+      "n",
+      "q",
+      M.close,
+      { buffer = split.bufnr, nowait = true, silent = true }
+    )
   end
 
   state = { sidebar = sidebar, main = main, cwd = cwd, files = files }
