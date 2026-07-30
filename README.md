@@ -63,6 +63,7 @@ Tests auto-bootstrap [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) on
 -- Lazy plugin spec
 {
   "marco-souza/plugin.nvim",
+  dependencies = { "MunifTanjim/nui.nvim" },
   config = function()
     require("plugin").setup()
   end,
@@ -78,10 +79,17 @@ Install it with your plugin manager, then run the `Plugin` user command — it s
 " -> notifies: hello from plugin.nvim!
 ```
 
-Add a keymap if you like:
+The `notes` subcommand opens a sidebar note-taking app for `*.md` files in the current directory:
+
+```vim
+:Plugin notes     " open the notes layout (sidebar 20% / main 80%)
+:Plugin close     " close it
+```
+
+In the layout: `<CR>` opens the file under the cursor in the sidebar; `q` closes the whole layout from either pane. Add a keymap if you like:
 
 ```lua
-vim.keymap.set("n", "<leader>ph", "<cmd>Plugin hello<cr>")
+vim.keymap.set("n", "<leader>pn", "<cmd>Plugin notes<cr>")
 ```
 
 Subcommands are defined in `lua/plugin/init.lua`; add your own there following the table shape in `lua/cmd.lua`.

@@ -11,6 +11,16 @@ local subcommands = {
       vim.notify("hello from plugin.nvim!")
     end,
   },
+  notes = {
+    impl = function(_, _)
+      require("plugin.notes").open()
+    end,
+  },
+  close = {
+    impl = function(_, _)
+      require("plugin.notes").close()
+    end,
+  },
 }
 
 ---@param opts? table user configuration
